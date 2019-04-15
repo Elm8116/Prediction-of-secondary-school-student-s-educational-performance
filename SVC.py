@@ -29,6 +29,7 @@ def eval_acc(data, target, model, feature):
     return np.mean(scores)
 
 
+# feature Selection with Genetic algorithm
 def select(data, model, target, train_time=100, threshold=0.05):
     features = list(data.columns)
     features = features[:-3]
@@ -97,60 +98,60 @@ def encoded_data(data, cols):
 
 
 data = pd.read_csv('../data/encoded_data_por.csv')
-# data = data.drop(['failures'], axis=1)
+data = data.drop(['failures'], axis=1)
 #
 n_class = 2
-# for col in ['G1', 'G2', 'G3']:
-#     for i in range(len(data)):
-#         if data.iloc[i][col] >10:
-#
-#             data.set_value(i, col, 1)
-#         else:
-#             data.set_value(i, col, 0)
-#
-# data = encoded_data(data, data.columns[:-3])
-# for col in data.columns[:-3]:
-#     mean = np.mean(data[col].values)
-#     std = np.std(data[col].values)
-#     data[col] = (data[col] - mean) / std
-#
-# for col in ['G1', 'G2', 'G3']:
-#     for type in data[col].unique():
-#         print(col, type, len(data[data[col] == type]))
-# data.to_csv('../data/encoded_data_por.csv', index=False)
-# kernels = ['linear', 'poly', 'rbf', 'sigmoid']
-# C = np.linspace(0.001, 1, num=10)
-# errors = []
-# data = shuffle(data)
-# X, y = data[data.columns[:-3]].values, data['G1'].values
-# x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50)
-# count = 0
-# for k in kernels:
-#     model = SVC(C=0.6, kernel=k)
-#     model.fit(x_train, y_train)
-#     errors.append((k, accuracy_score(y_test, model.predict(x_test))))
-#     print('step :', count)
-#     count += 1
-#
-# print(errors)
+for col in ['G1', 'G2', 'G3']:
+    for i in range(len(data)):
+        if data.iloc[i][col] >10:
+
+            data.set_value(i, col, 1)
+        else:
+            data.set_value(i, col, 0)
+
+data = encoded_data(data, data.columns[:-3])
+for col in data.columns[:-3]:
+    mean = np.mean(data[col].values)
+    std = np.std(data[col].values)
+    data[col] = (data[col] - mean) / std
+
+for col in ['G1', 'G2', 'G3']:
+    for type in data[col].unique():
+        print(col, type, len(data[data[col] == type]))
+data.to_csv('../data/encoded_data_por.csv', index=False)
+kernels = ['linear', 'poly', 'rbf', 'sigmoid']
+C = np.linspace(0.001, 1, num=10)
+errors = []
+data = shuffle(data)
+X, y = data[data.columns[:-3]].values, data['G1'].values
+x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50)
+count = 0
+for k in kernels:
+    model = SVC(C=0.6, kernel=k)
+    model.fit(x_train, y_train)
+    errors.append((k, accuracy_score(y_test, model.predict(x_test))))
+    print('step :', count)
+    count += 1
+
+print(errors)
+# results -> kernel = poly and c = 0.57750753768844225
 kernel = 'poly'
 c = 0.57750753768844225
 
-# scores = []
-# data = shuffle(data)
-# for ca in c:
-#     data = shuffle(data)
-#
-#     X, y = data[best_features].values, data['G1'].values
-#     x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50)
-#     model = SVC(C=ca, kernel=kernel)
-#     scores.append((ca, eval_acc(data, 'G1', model, best_features)))
-#
-# scores.sort(key=lambda x: x[1], reverse=True)
-# print(scores[0])
-# feature selection
-#
+scores = []
+data = shuffle(data)
+for ca in c:
+    data = shuffle(data)
 
+    X, y = data[best_features].values, data['G1'].values
+    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50)
+    model = SVC(C=ca, kernel=kernel)
+    scores.append((ca, eval_acc(data, 'G1', model, best_features)))
+
+scores.sort(key=lambda x: x[1], reverse=True)
+print(scores[0])
+
+# training model with selected feature
 model = SVC(C=c, kernel=kernel)
 best_features = ['goout', 'traveltime', 'famrel', 'freetime', 'romantic', 'Fedu', 'higher',
                  'schoolsup', 'reason', 'studytime', 'activities', 'Mjob', 'school', 'famsize']
@@ -159,6 +160,7 @@ X, y = data[best_features].values, data['G2'].values
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50)
 model.fit(x_train, y_train)
 
+# visualization  
 predicted = model.predict(x_test)
 pca = PCA(n_components=2)
 X_P = pca.fit_transform(x_test, y_test)
@@ -181,8 +183,6 @@ for i in range(len(predicted)):
     if predicted[i] != y_test[i]:
         miss += 1
 
-#
-#
 plt.title('miss' + ' ' + str(miss) + ' of ' + str(len(predicted)) )
 plt.show()
-#
+
