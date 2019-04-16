@@ -160,7 +160,7 @@ X, y = data[best_features].values, data['G2'].values
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=50)
 model.fit(x_train, y_train)
 
-# visualization  
+# visualization
 predicted = model.predict(x_test)
 pca = PCA(n_components=2)
 X_P = pca.fit_transform(x_test, y_test)
